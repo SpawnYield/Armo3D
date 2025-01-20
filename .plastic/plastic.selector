@@ -1,0 +1,4 @@
+repository "Armo2D@sylauncher@cloud"
+  path "/"
+    br "/main"
+    co "/main"

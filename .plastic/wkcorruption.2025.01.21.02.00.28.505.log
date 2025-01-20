@@ -1,0 +1,12 @@
+Process name: Unity
+Process image: C:\Program Files\Unity\Hub\Editor\6000.0.32f1\Editor\Unity.exe
+Process started: 2025.01.21.01.58.18.979
+Error: Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+StackTrace:   at System.Collections.Generic.List`1[T].get_Item (System.Int32 index) [0x00009] in <ed969b0e627d471da4848289f9c322df>:0 
+  at System.Collections.Generic.List`1[T].System.Collections.IList.get_Item (System.Int32 index) [0x00000] in <ed969b0e627d471da4848289f9c322df>:0 
+  at Codice.CM.WorkspaceServer.DataStore.WkTree.ReadLegacyWorkspaceTree.ReadNode (Codice.CM.Common.Serialization.PlasticBinaryReader reader, System.Collections.IList repSpecs, System.Collections.IList seids, Codice.CM.WorkspaceServer.IWorkspaceRevisionInfoCache cache, Codice.CM.WorkspaceServer.DataStore.WkTree.LegacyWorkspaceTreeOptions+Options options) [0x00018] in <bc4b394796a146d5958dfc6ea6c36a72>:0 
+  at Codice.CM.WorkspaceServer.DataStore.WkTree.ReadLegacyWorkspaceTree.ReadFromStream (System.Byte version, System.IO.Stream stream, Codice.CM.WorkspaceServer.IWorkspaceRevisionInfoCache revisionCache) [0x00026] in <bc4b394796a146d5958dfc6ea6c36a72>:0 
+  at Codice.CM.WorkspaceServer.DataStore.WkTree.ReadLegacyWorkspaceTree.Read (System.Byte version, System.Int32 treeSize, System.IO.FileStream fileStream, System.Byte[] dataBuffer, System.Int32 dataOffset, System.Int32 dataSize, Codice.CM.WorkspaceServer.IWorkspaceRevisionInfoCache revisionCache) [0x0001d] in <bc4b394796a146d5958dfc6ea6c36a72>:0 
+  at Codice.CM.WorkspaceServer.WorkspaceTreeDataStore.ReadWorkspaceContentFromFile (Codice.CM.Common.WorkspaceInfo wkInfo, System.String filePath, Codice.CM.WorkspaceServer.IWorkspaceRevisionInfoCache revisionCache, Codice.Utils.Buffers.FlexibleBufferPool bufferPool) [0x000e8] in <bc4b394796a146d5958dfc6ea6c36a72>:0 
+  at Codice.CM.WorkspaceServer.WorkspaceTreeDataStore.ReadWorkspaceTreeContent (Codice.CM.Common.WorkspaceInfo wkInfo, System.String wkTreeFile, Codice.CM.WorkspaceServer.IWorkspaceRevisionInfoCache revisionCache, Codice.Utils.Buffers.FlexibleBufferPool bufferPool) [0x00008] in <bc4b394796a146d5958dfc6ea6c36a72>:0 
