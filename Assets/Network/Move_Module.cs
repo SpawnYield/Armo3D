@@ -7,9 +7,8 @@ public class Move_Module : MonoBehaviour
     [SerializeField] private float walkSpeed = 6f; // Основная скорость движения
     [SerializeField] private float acceleration = 10f; // Ускорение
     [SerializeField] private float maxCameraDistance = 5f;
-    public float minSmoothing = 0.125f; // Минимальное значение сглаживания
-    public float maxSmoothing = 0.125f;  // Максимальное значение сглаживания
     [SerializeField] private float maxCharacterSpeed = 10f; // Скорость, при которой сглаживание минимально
+    [SerializeField] private float airControl = 0.5f; // Степень управления в воздухе
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce = 10f;
@@ -33,6 +32,8 @@ public class Move_Module : MonoBehaviour
     public bool OnJumping = false; // Флаг активного прыжка
     public bool isGrounded; // Проверка на нахождение на земле
     public bool CameraShiftLock = false;
+    public float minSmoothing = 0.125f; // Минимальное значение сглаживания
+    public float maxSmoothing = 0.125f;  // Максимальное значение сглаживания
 
     private Vector3 lastCharacterPosition; // Последняя позиция персонажа
     private Vector3 currentVelocity; // Скорость для SmoothDamp
@@ -54,20 +55,34 @@ public class Move_Module : MonoBehaviour
 
         // Рассчет целевой скорости
         Vector3 targetSpeed = (_movement.nextPosition.magnitude >= 0.01f ? 1f : 0f) * walkSpeed * _movement.nextPosition;
+
+        // Анимация
         _Animator.SetFloat("Speed", targetSpeed.magnitude);
         _Animator.SetBool("IsGround", isGrounded);
 
-        // Плавное изменение текущей скорости
-        playerVelocity = new Vector3(
-            Mathf.MoveTowards(playerVelocity.x, targetSpeed.x, acceleration * Time.fixedDeltaTime),
-            Mathf.Clamp(playerVelocity.y + gravity * Time.fixedDeltaTime, gravity, 100f),
-            Mathf.MoveTowards(playerVelocity.z, targetSpeed.z, acceleration * Time.fixedDeltaTime)
-        );
-
-        // Применение гравитации
-        if (isGrounded && !OnJumping && !Jumping)
+        if (isGrounded)
         {
-            playerVelocity.y = -0.5f; // Обнуляем вертикальную скорость при касании земли
+            // На земле управление резкое и отзывчивое
+            playerVelocity = new Vector3(
+                Mathf.MoveTowards(playerVelocity.x, targetSpeed.x, acceleration * Time.fixedDeltaTime),
+                playerVelocity.y, // Вертикальная скорость не изменяется на этом этапе
+                Mathf.MoveTowards(playerVelocity.z, targetSpeed.z, acceleration * Time.fixedDeltaTime)
+            );
+
+            // Применение гравитации
+            if (!OnJumping && !Jumping)
+            {
+                playerVelocity.y = -0.5f; // Удерживаем игрока на земле
+            }
+        }
+        else
+        {
+            // В воздухе управление плавное и инерционное
+            playerVelocity = new Vector3(
+                Mathf.Lerp(playerVelocity.x, targetSpeed.x, airControl * Time.fixedDeltaTime),
+                Mathf.Clamp(playerVelocity.y + gravity * Time.fixedDeltaTime, gravity, 100f), // Применение гравитации
+                Mathf.Lerp(playerVelocity.z, targetSpeed.z, airControl * Time.fixedDeltaTime)
+            );
         }
 
         // Прыжок
@@ -79,7 +94,7 @@ public class Move_Module : MonoBehaviour
             StartCoroutine(JumpCoroutine(new WaitForSeconds(0.2f), jumpForce));
         }
 
-        // Перемещение игрока с помощью CharacterController
+        // Перемещение игрока
         _characterController.Move(playerVelocity * Time.fixedDeltaTime);
 
         // Поворот персонажа

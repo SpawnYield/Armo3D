@@ -124,7 +124,8 @@ public class PlayerController : NetworkBehaviour
         }
 
         // Очистка ссылки на камеру
-        Game_Manager.instance._moveModule._mainCamera = null;
+        if(Game_Manager.instance._moveModule._mainCamera)
+            Game_Manager.instance._moveModule._mainCamera = null;
         cinemachine3rdPersonFollow = null;
     }
 
@@ -163,28 +164,50 @@ public class PlayerController : NetworkBehaviour
     private void RotateToTrue(InputAction.CallbackContext context) => OnRotate = true;
     private void RotateToFalse(InputAction.CallbackContext context) => OnRotate = false;
 
+    public float smoothRotationSpeed = 0.1f;  // Сглаживание поворота
+    public float rotationAcceleration = 5f;    // Ускорение вращения
+    public float rotationDeceleration = 5f;    // Замедление вращения
+    private float currentRotationSpeed = 0f;   // Текущая скорость вращения
+
     public void RotateHandle()
     {
-        // Вращение камеры по горизонтали и вертикали
-        Cameratarget.rotation *= Quaternion.AngleAxis(look.x * rotationPower, Vector3.up);   // Горизонтальное вращение
-        Cameratarget.rotation *= Quaternion.AngleAxis(-look.y * rotationPower, Vector3.right); // Вертикальное вращение
+        // Считываем ввод мыши или тачскрина для поворота
+        float horizontalInput = look.x * rotationPower;
+        float verticalInput = -look.y * rotationPower;
 
-        // Ограничение угла по вертикальной оси (X)
-        var localEulerAngles = Cameratarget.localEulerAngles;
-        localEulerAngles.z = 0; // Убираем нежелательное вращение по оси Z
+        // Расчёт целевого поворота
+        Quaternion targetRotation = Cameratarget.rotation * Quaternion.AngleAxis(horizontalInput, Vector3.up);
+        targetRotation *= Quaternion.AngleAxis(verticalInput, Vector3.right);
 
-        float clampedX = localEulerAngles.x > 180 ? localEulerAngles.x - 360 : localEulerAngles.x; // Приводим угол в диапазон -180...180
-        localEulerAngles.x = Mathf.Clamp(clampedX, -30, 60); // Ограничиваем угол по оси X
-        Cameratarget.localEulerAngles = localEulerAngles;
+        // Ограничиваем углы по вертикали
+        Vector3 eulerAngles = targetRotation.eulerAngles;
+        eulerAngles.z = 0; // Убираем нежелательное вращение по оси Z
 
-        // Плавное стабилизирующее вращение
-        Cameratarget.rotation = Quaternion.Lerp(Cameratarget.rotation, nextRotation, Time.deltaTime * rotationLerp);
+        // Приводим угол по вертикали в диапазон -30...60
+        eulerAngles.x = Mathf.Clamp(eulerAngles.x > 180 ? eulerAngles.x - 360 : eulerAngles.x, -30, 60);
 
-        // Рассчёт движения камеры
+        // Сглаживание вращения: увеличиваем или уменьшаем скорость в зависимости от направления
+        if (horizontalInput != 0 || verticalInput != 0)
+        {
+            // Разгоняем скорость вращения
+            currentRotationSpeed = Mathf.MoveTowards(currentRotationSpeed, rotationAcceleration, Time.deltaTime * rotationAcceleration);
+        }
+        else
+        {
+            // Замедляем скорость вращения
+            currentRotationSpeed = Mathf.MoveTowards(currentRotationSpeed, 0, Time.deltaTime * rotationDeceleration);
+        }
+
+        // Плавно вращаем камеру с учетом текущей скорости
+        Cameratarget.rotation = Quaternion.Slerp(Cameratarget.rotation, Quaternion.Euler(eulerAngles), Time.deltaTime * currentRotationSpeed);
+
+        // Рассчитываем движение камеры
         nextPosition = (Vector2.Distance(Vector2.zero, move) > 0.01f)
             ? (Cameratarget.forward * move.y + Cameratarget.right * move.x).normalized
             : Vector3.zero;
     }
+
+
 
 
     private void OnLook(InputAction.CallbackContext context)
