@@ -17,6 +17,7 @@ public class PlayerController : NetworkBehaviour
     private Cinemachine3rdPersonFollow cinemachine3rdPersonFollow;
     private InputActionMap _actionMap;
     private InputActionMap _actionMapUI;
+    private InputAction BasicAttackAction;
     private InputAction moveAction;
     private InputAction lookAction;
     private InputAction jumpAction;
@@ -25,7 +26,7 @@ public class PlayerController : NetworkBehaviour
     private InputAction cameraSwitchAction;
 
     public float2 move = new(0, 0);
-    public float2 look = new(0, 0);
+    public float2 look = new(0, 0); 
     public Vector3 nextPosition;
     public Quaternion nextRotation;
 
@@ -39,6 +40,10 @@ public class PlayerController : NetworkBehaviour
         rotationPower = SettingsManager.Sensivity;
         _actionMap = _actionAsset.FindActionMap("Player");
         _actionMapUI = _actionAsset.FindActionMap("UI");
+
+        BasicAttackAction = _actionMap.FindAction("Attack");
+        BasicAttackAction.Enable();
+        BasicAttackAction.started += BasicAttackEvent;
 
         moveAction = _actionMap.FindAction("Move");
         moveAction.Enable();
@@ -79,6 +84,12 @@ public class PlayerController : NetworkBehaviour
 
     public void Deinit()
     {
+        if (BasicAttackAction != null)
+        {
+            BasicAttackAction.started -= BasicAttackEvent;
+            BasicAttackAction.Disable();
+   
+        }
         if (moveAction != null)
         {
             moveAction.started -= OnMove;
@@ -128,7 +139,12 @@ public class PlayerController : NetworkBehaviour
             Game_Manager.instance._moveModule._mainCamera = null;
         cinemachine3rdPersonFollow = null;
     }
-
+    private void BasicAttackEvent(InputAction.CallbackContext context)
+    {
+        if (Game_Manager.instance == null || Game_Manager.instance._moveModule == null)
+            return;
+        Game_Manager.instance._moveModule.BasicAttack();
+    }
     private void SwitchCamera(InputAction.CallbackContext context)
     {
         if (Game_Manager.instance == null || Game_Manager.instance._moveModule == null)
@@ -184,21 +200,21 @@ public class PlayerController : NetworkBehaviour
         eulerAngles.z = 0; // ”бираем нежелательное вращение по оси Z
 
         // ѕриводим угол по вертикали в диапазон -30...60
-        eulerAngles.x = Mathf.Clamp(eulerAngles.x > 180 ? eulerAngles.x - 360 : eulerAngles.x, -30, 60);
+        eulerAngles.x = Mathf.Clamp(eulerAngles.x > 180 ? eulerAngles.x - 360 : eulerAngles.x, -30, 65);
 
-        // —глаживание вращени€: увеличиваем или уменьшаем скорость в зависимости от направлени€
-        if (horizontalInput != 0 || verticalInput != 0)
+        // ”величение и уменьшение скорости вращени€ с плавным ускорением/замедлением
+        if (Mathf.Abs(horizontalInput) > 0.01f || Mathf.Abs(verticalInput) > 0.01f)
         {
-            // –азгон€ем скорость вращени€
+            // ”скор€ем вращение
             currentRotationSpeed = Mathf.MoveTowards(currentRotationSpeed, rotationAcceleration, Time.deltaTime * rotationAcceleration);
         }
         else
         {
-            // «амедл€ем скорость вращени€
+            // «амедл€ем вращение
             currentRotationSpeed = Mathf.MoveTowards(currentRotationSpeed, 0, Time.deltaTime * rotationDeceleration);
         }
 
-        // ѕлавно вращаем камеру с учетом текущей скорости
+        // »спользуем Slerp дл€ плавного вращени€ камеры
         Cameratarget.rotation = Quaternion.Slerp(Cameratarget.rotation, Quaternion.Euler(eulerAngles), Time.deltaTime * currentRotationSpeed);
 
         // –ассчитываем движение камеры
@@ -206,6 +222,8 @@ public class PlayerController : NetworkBehaviour
             ? (Cameratarget.forward * move.y + Cameratarget.right * move.x).normalized
             : Vector3.zero;
     }
+
+
 
 
 

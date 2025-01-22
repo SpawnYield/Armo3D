@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public class Move_Module : MonoBehaviour
 {
@@ -25,7 +27,8 @@ public class Move_Module : MonoBehaviour
     public CharacterController _characterController;
     public Transform _mainCamera;
     public PlayerController _movement;
-
+    private List<(float speedMultiplier, float durationInMilliseconds)> speedEffects = new();
+    private float TotalSpeedMulti = 1f;
     public Vector2 velocity = Vector2.zero;
     public float magnitude = 0.25f;
     public bool Jumping = false; // Флаг прыжка
@@ -34,10 +37,12 @@ public class Move_Module : MonoBehaviour
     public bool CameraShiftLock = false;
     public float minSmoothing = 0.125f; // Минимальное значение сглаживания
     public float maxSmoothing = 0.125f;  // Максимальное значение сглаживания
+    public float attackTime = 0.5f;           // Время атаки (для анимации)
+    public float cooldownTime = 1f;          // Время отката после атаки
 
     private Vector3 lastCharacterPosition; // Последняя позиция персонажа
     private Vector3 currentVelocity; // Скорость для SmoothDamp
-
+    private bool BasicAttackCooldown =false;
     private void FixedUpdate()
     {
         if (!_mainCamera)
@@ -47,14 +52,36 @@ public class Move_Module : MonoBehaviour
         _movement.RotateHandle();
         HandleCameraFollow();
     }
-
+    private void Update()
+    {
+        if (!_mainCamera) return;
+        TotalSpeedMulti = 1f;
+        for (int i = 0; i < speedEffects.Count; i++)
+        {
+            // Уменьшаем длительность каждого эффекта на время обновления
+            var effect = speedEffects[i];
+            effect.durationInMilliseconds -= Time.fixedDeltaTime; // Конвертируем в миллисекунды
+            TotalSpeedMulti *= effect.speedMultiplier;  // Умножаем каждый множитель
+            // Если длительность эффекта закончена, удаляем его из списка
+            if (effect.durationInMilliseconds <= 0)
+            {
+                speedEffects.RemoveAt(i);
+                i--;  // Уменьшаем индекс, чтобы не пропустить следующий элемент
+            }
+            else
+            {
+                // Обновляем эффект в списке
+                speedEffects[i] = effect;
+            }
+        }
+    }
     private void HandleMovement()
     {
         // Проверка, находится ли игрок на земле
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
-
+       
         // Рассчет целевой скорости
-        Vector3 targetSpeed = (_movement.nextPosition.magnitude >= 0.01f ? 1f : 0f) * walkSpeed * _movement.nextPosition;
+        Vector3 targetSpeed = (_movement.nextPosition.magnitude >= 0.01f ? 1f : 0f) * TotalSpeedMulti * walkSpeed * _movement.nextPosition;
 
         // Анимация
         _Animator.SetFloat("Speed", targetSpeed.magnitude);
@@ -101,6 +128,23 @@ public class Move_Module : MonoBehaviour
         HandleRotation();
     }
 
+    public void BasicAttack()
+    {
+        if(!isGrounded||BasicAttackCooldown )
+            return;
+        StartCoroutine(BasicAttackCourutine(attackTime,new(cooldownTime)));
+    }
+    private IEnumerator BasicAttackCourutine(float attackTime, WaitForSeconds CooldownTime)
+    {
+        BasicAttackCooldown = true;
+        _Animator.SetTrigger("Slash");
+        AddSpeedEffect(.01f,attackTime);
+        yield return new WaitForSeconds(attackTime);
+
+        yield return CooldownTime;
+        BasicAttackCooldown = false;
+        yield return null;
+    }
     private void HandleRotation()
     {
         if (playerVelocity.magnitude > 0.1f)
@@ -119,7 +163,10 @@ public class Move_Module : MonoBehaviour
             
         }
     }
-
+    public void AddSpeedEffect(float speedMultiplier, float durationInMilliseconds)
+    {
+        speedEffects.Add((speedMultiplier, durationInMilliseconds));
+    }
     private void HandleCameraFollow()
     {
         Vector3 characterPosition = _characterController.transform.position + cameraOffset;
