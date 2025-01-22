@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
+
 
 public class Move_Module : MonoBehaviour
 {
@@ -11,6 +11,7 @@ public class Move_Module : MonoBehaviour
     [SerializeField] private float maxCameraDistance = 5f;
     [SerializeField] private float maxCharacterSpeed = 10f; // Скорость, при которой сглаживание минимально
     [SerializeField] private float airControl = 0.5f; // Степень управления в воздухе
+    [SerializeField] private GameObject Damager;
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce = 10f;
@@ -27,7 +28,7 @@ public class Move_Module : MonoBehaviour
     public CharacterController _characterController;
     public Transform _mainCamera;
     public PlayerController _movement;
-    private List<(float speedMultiplier, float durationInMilliseconds)> speedEffects = new();
+    private readonly List<(float speedMultiplier, float durationInMilliseconds)> speedEffects = new();
     private float TotalSpeedMulti = 1f;
     public Vector2 velocity = Vector2.zero;
     public float magnitude = 0.25f;
@@ -60,7 +61,7 @@ public class Move_Module : MonoBehaviour
         {
             // Уменьшаем длительность каждого эффекта на время обновления
             var effect = speedEffects[i];
-            effect.durationInMilliseconds -= Time.fixedDeltaTime; // Конвертируем в миллисекунды
+            effect.durationInMilliseconds -= Time.deltaTime; // Конвертируем в миллисекунды
             TotalSpeedMulti *= effect.speedMultiplier;  // Умножаем каждый множитель
             // Если длительность эффекта закончена, удаляем его из списка
             if (effect.durationInMilliseconds <= 0)
@@ -138,7 +139,8 @@ public class Move_Module : MonoBehaviour
     {
         BasicAttackCooldown = true;
         _Animator.SetTrigger("Slash");
-        AddSpeedEffect(.01f,attackTime);
+        AddSpeedEffect(.001f,attackTime);
+        DelltaActivator.EnableForTime(Damager, 0.15f);
         yield return new WaitForSeconds(attackTime);
 
         yield return CooldownTime;

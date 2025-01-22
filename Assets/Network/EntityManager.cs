@@ -32,7 +32,7 @@ public class EntityManager : MonoBehaviour
             }, null);
             foreach (EnemyTargetComponent result in FindObjectsByType<EnemyTargetComponent>(FindObjectsSortMode.None))
             {
-                unityContext.Post(_ =>{ Targets.Add(result.transform); }, null);
+                if (result!=null) unityContext.Post(_ =>{Targets.Add(result.transform); }, null);
             }
             await Task.Delay(intervalMs);
         }
