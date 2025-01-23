@@ -15,7 +15,6 @@ public class HealthUI : MonoBehaviour
     {
         // Инициализируем слайдер значениями
         UpdateHealthUI();
-        Debug.Log("Started");
         // Подписываемся на событие изменения здоровья
         _Humanoid.OnTakeDamaged += UpdateHealthUI;
         _Humanoid.OnMaxHealthChanged += UpdateHealthUI;
@@ -28,7 +27,6 @@ public class HealthUI : MonoBehaviour
         {
             StopCoroutine(healthCoroutine);
         }
-        Debug.Log("Channger");
         // Запускаем новую корутину для плавного изменения
         healthCoroutine = StartCoroutine(AnimateHealthChange(_HealthSlider.value, _Humanoid.Health));
     }

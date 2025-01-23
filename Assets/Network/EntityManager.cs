@@ -33,14 +33,13 @@ public class EntityManager : MonoBehaviour
             }, null);
             foreach (EnemyTargetComponent result in FindObjectsByType<EnemyTargetComponent>(FindObjectsSortMode.None))
             {
-                if (result != null && result.transform != null && Targets != null && unityContext != null)
-                {
-                    if (result.Died) continue;
-                    unityContext.Post(_ =>
-                    {
-                        Targets.Add(result.transform);
-                    }, null);
-                }
+
+                if (result == null||result.Died|| result.transform == null) continue;
+                unityContext.Post(_ =>{
+                        if (result != null && result.transform != null && Targets != null && unityContext != null)
+                            Targets.Add(result.transform);
+                }, null);
+                
             }
             await Task.Delay(intervalMs);
         }
