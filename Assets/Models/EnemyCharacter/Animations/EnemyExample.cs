@@ -18,20 +18,41 @@ public class EnemyExample : MonoBehaviour
     [SerializeField] private LayerMask GroundCheckLayer;
     [SerializeField] private float EnemySpeed = 1f;
     [SerializeField] private GameObject Damager;
-
+    [SerializeField] private Humanoid _humanoid;
     private float EnemySpeedMultiplayer = 1f;
     private bool Attacked = false;
     private SynchronizationContext unityContext;
     private Transform Target;
+    public bool Stuned { get;private set;}
     private void Start()
     {
         unityContext = SynchronizationContext.Current;
         agent.enabled = true;
+        _humanoid.OnTakeDamaged += TakeDamaged;
+        _humanoid.OnDied += onDied;
         AgentPositionSync(200);
         EnemyAttack(200);
     }
     [SerializeField] private readonly List<(float speedMultiplier, float durationInMilliseconds)> speedEffects = new();
+    [SerializeField] private readonly List<float> stuns = new();
 
+    private void OnDestroy()
+    {
+        if (_humanoid != null)
+        {
+            _humanoid.OnTakeDamaged -= TakeDamaged;
+            _humanoid.OnDied -= onDied;
+        }
+    }
+    private void onDied()
+    {
+        _Animator.SetBool("Died",true);
+    }
+    private void TakeDamaged()
+    {
+        speedEffects.Add((0.1f, 0.25f));
+        _Animator.SetTrigger("TakeDamage");
+    }
     private void SpeedUpdate()
     {
         EnemySpeedMultiplayer = 1f;
@@ -57,7 +78,33 @@ public class EnemyExample : MonoBehaviour
                 }
             }
         }
+        if(stuns.Count != 0)
+        {
+            for (int i = 0; i < stuns.Count; i++)
+            {
+                // Уменьшаем длительность каждого эффекта на время обновления
+                var effect = stuns[i];
+                effect -= 1000f * Time.fixedDeltaTime; // Конвертируем в миллисекунды
+                Debug.Log(effect);
+                
+                if (effect <= 0)
+                {
+                    stuns.RemoveAt(i);
+                    i--;  // Уменьшаем индекс, чтобы не пропустить следующий элемент
+                }
+                else
+                {
+                    // Обновляем эффект в списке
+                    stuns[i] = effect;
+                }
 
+            }
+            Stuned =true;
+        }
+        else
+        {
+            Stuned =false;
+        }
         agent.speed = EnemySpeedMultiplayer*EnemySpeed;
     }
     private async void AgentPositionSync(int intervalMs)
@@ -108,7 +155,7 @@ public class EnemyExample : MonoBehaviour
             Attacked = true;
             _Animator.SetTrigger("Attack");
             _Animator.SetBool("Left",!_Animator.GetBool("Left"));
-            DelltaActivator.EnableForTime(Damager, 0.15f);
+            DelltaActivator.EnableForTime(Damager, 0.1f);
             speedEffects.Add((.01f, 100f));
             yield return Cooldown;
             Attacked =false;
@@ -119,6 +166,11 @@ public class EnemyExample : MonoBehaviour
         {
             if (this != null && Target != null && Vector3.Distance(Target.position,transform.position)< AttackDistance)
             {
+                if(Stuned)
+                    return;
+                if (_humanoid != null)
+                    if (_humanoid.Died)
+                        return;
                 if (!Attacked)
                 {
                     Vector3 targetDirection = Target.position - characterController.transform.position;

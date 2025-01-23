@@ -81,7 +81,7 @@ public class Humanoid : MonoBehaviour
         get => mana;
         set => mana = Mathf.Clamp(value, 0, maxMana); // Ограничиваем ману в пределах [0, maxMana]
     }
-
+    public event Action OnDied;
     public event Action OnTakeDamaged;
     public event Action OnMaxHealthChanged;
     public event Action OnMaxStaminaChanged;
@@ -106,7 +106,9 @@ public class Humanoid : MonoBehaviour
         {
             Died = true;
             Debug.Log($"{Name} умер от {Killer.name}");
+            OnDied?.Invoke();
         }
+        
     }
     private void Start()
     {

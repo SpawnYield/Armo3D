@@ -36,7 +36,7 @@ public class HealthUI : MonoBehaviour
     private IEnumerator AnimateHealthChange(float startValue, float endValue)
     {
         float elapsedTime = 0f;
-        Debug.Log($"Channger start");
+
         while (elapsedTime < animationDuration)
         {
             elapsedTime += Time.deltaTime;
@@ -44,10 +44,9 @@ public class HealthUI : MonoBehaviour
 
             // Ћинейна€ интерпол€ци€ значени€
             _HealthSlider.value = Mathf.Lerp(startValue, endValue, t);
-            Debug.Log($"Channger to {endValue}");
             yield return null; // ∆дем следующий кадр
         }
-        Debug.Log($"Channger to end {endValue}");
+
         // ”станавливаем конечное значение
         _HealthSlider.value = endValue;
     }

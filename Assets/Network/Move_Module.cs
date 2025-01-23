@@ -12,6 +12,8 @@ public class Move_Module : MonoBehaviour
     [SerializeField] private float maxCharacterSpeed = 10f; // Скорость, при которой сглаживание минимально
     [SerializeField] private float airControl = 0.5f; // Степень управления в воздухе
     [SerializeField] private GameObject Damager;
+    [SerializeField] private Humanoid _humanoid;
+
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce = 10f;
@@ -44,6 +46,23 @@ public class Move_Module : MonoBehaviour
     private Vector3 lastCharacterPosition; // Последняя позиция персонажа
     private Vector3 currentVelocity; // Скорость для SmoothDamp
     private bool BasicAttackCooldown =false;
+
+
+    private void Start()
+    {
+        _humanoid.OnTakeDamaged += TakeDamaged;
+    }
+    private void OnDestroy()
+    {
+        if(_humanoid!=null)
+            _humanoid.OnTakeDamaged -= TakeDamaged;
+    }
+    private void TakeDamaged()
+    {
+        speedEffects.Add((0.1f, 0.25f));
+        _Animator.SetTrigger("TakeDamage");
+    }
+
     private void FixedUpdate()
     {
         if (!_mainCamera)
@@ -140,7 +159,7 @@ public class Move_Module : MonoBehaviour
         BasicAttackCooldown = true;
         _Animator.SetTrigger("Slash");
         AddSpeedEffect(.001f,attackTime);
-        DelltaActivator.EnableForTime(Damager, 0.15f);
+        DelltaActivator.EnableForTime(Damager, 0.1f);
         yield return new WaitForSeconds(attackTime);
 
         yield return CooldownTime;
