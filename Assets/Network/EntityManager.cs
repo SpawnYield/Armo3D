@@ -28,11 +28,19 @@ public class EntityManager : MonoBehaviour
         {
             unityContext.Post(_ =>
             {
-                Targets.Clear();
+                if(Targets!=null)
+                    Targets.Clear();
             }, null);
             foreach (EnemyTargetComponent result in FindObjectsByType<EnemyTargetComponent>(FindObjectsSortMode.None))
             {
-                if (result!=null) unityContext.Post(_ =>{Targets.Add(result.transform); }, null);
+                if (result != null && result.transform != null && Targets != null && unityContext != null)
+                {
+                    if (result.Died) continue;
+                    unityContext.Post(_ =>
+                    {
+                        Targets.Add(result.transform);
+                    }, null);
+                }
             }
             await Task.Delay(intervalMs);
         }
@@ -55,7 +63,7 @@ public class EntityManager : MonoBehaviour
                     break;
                 default:
                     {
-                        if (Vector3.Distance(_Position, result.position) <= _Distance)
+                        if (Vector3.Distance(_Position, result!=null? result.position:Vector3.zero) <= _Distance)
                         {
                             return result;
                         }

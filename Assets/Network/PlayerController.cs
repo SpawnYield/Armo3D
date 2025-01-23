@@ -259,6 +259,5 @@ public class PlayerController : NetworkBehaviour
     public override void OnDestroy()
     {
         Deinit();
-        Debug.Log("Deinited");
     }
 }

@@ -18,14 +18,18 @@ public class EnemyExample : MonoBehaviour
     [SerializeField] private LayerMask GroundCheckLayer;
     [SerializeField] private float EnemySpeed = 1f;
     [SerializeField] private GameObject Damager;
+    [SerializeField] private GameObject _HpCanvas;
     [SerializeField] private Humanoid _humanoid;
     private float EnemySpeedMultiplayer = 1f;
     private bool Attacked = false;
     private SynchronizationContext unityContext;
+    private EnemyTargetComponent _targetComponent; // Кэшируем ссылку на EnemyTargetComponent
     private Transform Target;
     public bool Stuned { get;private set;}
     private void Start()
     {
+        _HpCanvas.SetActive(true);
+        characterController.enabled = true;
         unityContext = SynchronizationContext.Current;
         agent.enabled = true;
         _humanoid.OnTakeDamaged += TakeDamaged;
@@ -46,7 +50,10 @@ public class EnemyExample : MonoBehaviour
     }
     private void onDied()
     {
+        _Animator.SetFloat("speed", 0f);
         _Animator.SetBool("Died",true);
+        _HpCanvas.SetActive(false);
+        characterController.enabled = false;
     }
     private void TakeDamaged()
     {
@@ -63,7 +70,6 @@ public class EnemyExample : MonoBehaviour
                 // Уменьшаем длительность каждого эффекта на время обновления
                 var effect = speedEffects[i];
                 effect.durationInMilliseconds -=1000f*Time.fixedDeltaTime; // Конвертируем в миллисекунды
-                Debug.Log(effect);
                 EnemySpeedMultiplayer *= effect.speedMultiplier;  // Умножаем каждый множитель
                                                        // Если длительность эффекта закончена, удаляем его из списка
                 if (effect.durationInMilliseconds <= 0)
@@ -116,8 +122,11 @@ public class EnemyExample : MonoBehaviour
             {
                 unityContext.Post(_ =>
                 {
-                    Target = EntityManager.GetTarget(Distance, characterController.transform.position, SortType.None);
-                
+                    Target = EntityManager.GetTarget(Distance, characterController != null? characterController.transform.position:Vector3.zero, SortType.None);
+                    if(Target != null)
+                        _targetComponent = Target.GetComponent<EnemyTargetComponent>();
+
+
                 }, null);
                 if(Target == null)
                 {
@@ -134,10 +143,19 @@ public class EnemyExample : MonoBehaviour
             {
                 if (this != null && agent != null)
                 {
+                
+                    if (_humanoid.Died)
+                    {
+                        return;
+                    }
                     SpeedUpdate();
                     _Animator.SetBool("isGround", Physics.CheckSphere(groundCheckTransform.position, GroundCheckRadius, GroundCheckLayer));
                     _Animator.SetFloat("speed", agent.velocity.magnitude*agent.speed);
-                    agent.SetDestination(Target.position);
+
+                    if (_targetComponent != null && _targetComponent.Died)
+                        Target = null;
+                    if(Target!= null)
+                        agent.SetDestination(Target.position);
                     characterController.Move(targetPosition);
                 }
             }, null);

@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 
 public class Move_Module : MonoBehaviour
@@ -13,7 +16,8 @@ public class Move_Module : MonoBehaviour
     [SerializeField] private float airControl = 0.5f; // Степень управления в воздухе
     [SerializeField] private GameObject Damager;
     [SerializeField] private Humanoid _humanoid;
-
+    [SerializeField] private LayerMask AttackLayer;
+    [SerializeField] private float AutoAttackRaduis = 1f;
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce = 10f;
@@ -22,11 +26,13 @@ public class Move_Module : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private Animator _Animator;
+    [SerializeField] private EnemyTargetComponent _enemyTargetComponent;
 
     [Header("Camera Settings")]
     [SerializeField] private Vector3 playerVelocity = Vector3.zero; // Текущая скорость
     [SerializeField] private Vector3 cameraOffset = new(0f,.5f,0f); // Текущая скорость
-
+    [SerializeField] private TMP_Text YouDiedText;
+    [SerializeField] private Image BlackGround;
     public CharacterController _characterController;
     public Transform _mainCamera;
     public PlayerController _movement;
@@ -46,16 +52,29 @@ public class Move_Module : MonoBehaviour
     private Vector3 lastCharacterPosition; // Последняя позиция персонажа
     private Vector3 currentVelocity; // Скорость для SmoothDamp
     private bool BasicAttackCooldown =false;
-
+    private bool _died = false;
 
     private void Start()
     {
         _humanoid.OnTakeDamaged += TakeDamaged;
+        _humanoid.OnDied += onDied;
     }
     private void OnDestroy()
     {
-        if(_humanoid!=null)
+        if (_humanoid != null)
+        {
             _humanoid.OnTakeDamaged -= TakeDamaged;
+            _humanoid.OnDied -= onDied;
+        }
+    }
+    private void onDied()
+    {
+        _enemyTargetComponent.Died = true;
+        YouDiedText.enabled = true;
+        BlackGround.enabled = true;
+        _died = true;
+        _Animator.SetBool("Died",true);
+        _characterController.enabled = false;
     }
     private void TakeDamaged()
     {
@@ -67,7 +86,6 @@ public class Move_Module : MonoBehaviour
     {
         if (!_mainCamera)
             return;
-
         HandleMovement();
         _movement.RotateHandle();
         HandleCameraFollow();
@@ -97,6 +115,7 @@ public class Move_Module : MonoBehaviour
     }
     private void HandleMovement()
     {
+        if(_died)return;
         // Проверка, находится ли игрок на земле
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
        
@@ -147,20 +166,60 @@ public class Move_Module : MonoBehaviour
         // Поворот персонажа
         HandleRotation();
     }
-
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.TransformPoint(Vector3.zero), AutoAttackRaduis);
+    }
     public void BasicAttack()
     {
-        if(!isGrounded||BasicAttackCooldown )
+        if(!isGrounded||BasicAttackCooldown || _died)
             return;
         StartCoroutine(BasicAttackCourutine(attackTime,new(cooldownTime)));
     }
     private IEnumerator BasicAttackCourutine(float attackTime, WaitForSeconds CooldownTime)
     {
+        Transform Target = null;
+        Collider[] hitColliders = Physics.OverlapSphere(_characterController.transform.position, AutoAttackRaduis, AttackLayer);
+        AddSpeedEffect(0f, attackTime);
+        foreach (var hitCollider in hitColliders)
+        {
+            hitCollider.gameObject.TryGetComponent(out Humanoid humanoid);
+            if (humanoid != null)
+            {
+                Target = humanoid.transform;
+            }
+        }
+        if(Target!=null)
+        {
+            Vector3 targetDirection = Target.position - _characterController.transform.position;
+            targetDirection.y = 0; // Это чтобы персонаж не наклонялся вверх/вниз, а только по горизонтали
+            Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+            _characterController.transform.rotation = Quaternion.Slerp(
+            _characterController.transform.rotation,
+            targetRotation,
+            10f
+             );
+            Debug.Log("Look To1");
+        }
         BasicAttackCooldown = true;
         _Animator.SetTrigger("Slash");
-        AddSpeedEffect(.001f,attackTime);
         DelltaActivator.EnableForTime(Damager, 0.1f);
+        yield return new WaitForSeconds(0.01f);
+        if (Target != null)
+        {
+            Vector3 targetDirection = Target.position - _characterController.transform.position;
+            targetDirection.y = 0; // Это чтобы персонаж не наклонялся вверх/вниз, а только по горизонтали
+            Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+            _characterController.transform.rotation = Quaternion.Slerp(
+            _characterController.transform.rotation,
+            targetRotation,
+            10f
+             );
+            Debug.Log("Look To2");
+        }
         yield return new WaitForSeconds(attackTime);
+
 
         yield return CooldownTime;
         BasicAttackCooldown = false;

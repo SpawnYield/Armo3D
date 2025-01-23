@@ -46,7 +46,7 @@ public class HealthUI : MonoBehaviour
             _HealthSlider.value = Mathf.Lerp(startValue, endValue, t);
             yield return null; // ∆дем следующий кадр
         }
-
+        _HealthSlider.maxValue = _Humanoid.MaxHealth;
         // ”станавливаем конечное значение
         _HealthSlider.value = endValue;
     }
