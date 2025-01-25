@@ -33,7 +33,7 @@ public class EnemyExample : MonoBehaviour
         unityContext = SynchronizationContext.Current;
         agent.enabled = true;
         _humanoid.OnTakeDamaged += TakeDamaged;
-        _humanoid.OnDied += onDied;
+        _humanoid.OnDied += OnDied;
         AgentPositionSync(200);
         EnemyAttack(200);
     }
@@ -45,10 +45,10 @@ public class EnemyExample : MonoBehaviour
         if (_humanoid != null)
         {
             _humanoid.OnTakeDamaged -= TakeDamaged;
-            _humanoid.OnDied -= onDied;
+            _humanoid.OnDied -= OnDied;
         }
     }
-    private void onDied()
+    private void OnDied()
     {
         _Animator.SetFloat("speed", 0f);
         _Animator.SetBool("Died",true);

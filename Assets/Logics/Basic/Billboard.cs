@@ -1,4 +1,4 @@
-using System.Threading;
+
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -7,10 +7,9 @@ public class Billboard : MonoBehaviour
     private Camera mainCamera;
     private Transform thisTransform;
     private Canvas canvas;
-    private SynchronizationContext unityContext;
+
     private void Start()
     {
-        unityContext = SynchronizationContext.Current;
         canvas = GetComponent<Canvas>();
         mainCamera = Camera.main; // Получаем основную камеру
         TargetsUpdateAsync(); // Запускаем асинхронное обновление
@@ -47,11 +46,6 @@ public class Billboard : MonoBehaviour
     {
         if (!OnUpdate || mainCamera == null)
             return;
-
-        // Если цели нет, Billboard ориентируется на камеру
-        Vector3 targetPosition = thisTransform != null
-            ? thisTransform.position
-            : mainCamera.transform.position;
 
         // Устанавливаем позицию для Billboard с учётом ориентации
         Vector3 directionToCamera = transform.position - mainCamera.transform.position;
