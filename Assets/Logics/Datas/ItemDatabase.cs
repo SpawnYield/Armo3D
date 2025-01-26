@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+
 
 [CreateAssetMenu(fileName = "ItemDatabase", menuName = "Database/Item Database")]
 
@@ -11,7 +11,6 @@ public class ItemDatabase : ScriptableObject
     // Глобальный статический список всех предметов
     [HideInInspector] 
     public List<ItemPrefab> Items = new List<ItemPrefab>();
-    public static List<ItemPrefab> GlobalItemList = new List<ItemPrefab>();
     // Очередь свободных ID
     private static HashSet<int> freeIds = new HashSet<int>();
 
@@ -86,9 +85,9 @@ public class ItemDatabase : ScriptableObject
         foreach (var item in Items)
         {
             // Проверяем, чтобы не добавить элемент в глобальный список, если его уже там нет (по ID)
-            if (!GlobalItemList.Exists(existingItem => existingItem.Id == item.Id))
+            if (!CentralData.centralData.GlobalItemList.Exists(existingItem => existingItem.Id == item.Id))
             {
-                GlobalItemList.Add(item);
+                CentralData.centralData.GlobalItemList.Add(item);
             }
         }
 
@@ -98,12 +97,12 @@ public class ItemDatabase : ScriptableObject
     public void RemoveFromGlobalList(int itemId)
     {
         // Находим элемент в глобальном списке по ID
-        var itemToRemove = GlobalItemList.FirstOrDefault(existingItem => existingItem.Id == itemId);
+        var itemToRemove = CentralData.centralData.GlobalItemList.FirstOrDefault(existingItem => existingItem.Id == itemId);
 
         if (itemToRemove != null)
         {
             // Удаляем элемент, если он найден
-            GlobalItemList.Remove(itemToRemove);
+            CentralData.centralData.GlobalItemList.Remove(itemToRemove);
             Debug.Log("Предмет с ID " + itemId + " удален из глобального списка.");
         }
         else
@@ -116,7 +115,7 @@ public class ItemDatabase : ScriptableObject
     // Очистка глобального списка
     public static void ClearGlobalList()
     {
-        GlobalItemList.Clear();
+        CentralData.centralData.GlobalItemList.Clear();
         Debug.Log("Глобальный список очищен.");
     }
 
@@ -127,19 +126,7 @@ public class ItemDatabase : ScriptableObject
 
     public static List<ItemPrefab> GetGlobalItemList()
     {
-        return GlobalItemList;
+        return CentralData.centralData.GlobalItemList;
     }
 }
 
-
-[Serializable]
-public class ItemPrefab
-{
-    public int Id = -1; // Уникальный ID
-    public AssetReference Link; // Ссылка на ресурс
-
-    public void SetId(int id)
-    {
-        Id = id;
-    }
-}

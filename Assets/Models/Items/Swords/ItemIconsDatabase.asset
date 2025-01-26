@@ -16,14 +16,16 @@ MonoBehaviour:
   - Id: 1
     Link:
       m_AssetGUID: f5101019ed0bcc24da4c52d4c8be729c
-      m_SubObjectName: 
+      m_SubObjectName: ico_1
       m_SubObjectGUID: 
-      m_SubObjectType: 
+      m_SubObjectType: UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       m_EditorAssetChanged: 1
   - Id: 2
     Link:
       m_AssetGUID: 8c0da21d1629f2c4493b7f505cb26b70
-      m_SubObjectName: 
+      m_SubObjectName: ico_2
       m_SubObjectGUID: 
-      m_SubObjectType: 
+      m_SubObjectType: UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       m_EditorAssetChanged: 1

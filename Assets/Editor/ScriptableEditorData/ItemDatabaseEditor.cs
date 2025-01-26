@@ -84,8 +84,16 @@ public class ItemDatabaseEditor : Editor
         {
             ItemDatabase.PrintGlobalList();
         }
-
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Синхронизировать глобальным и локальный список", EditorStyles.boldLabel);
+        GUI.backgroundColor = new(1, 0.5f, 0.75f);
+        if (GUILayout.Button("Синхронизировать", GUILayout.Width(400), GUILayout.Height(40)))
+        {
+            itemDatabase.MergeToGlobalList();
+        }
+        EditorGUILayout.Space();
         GUI.backgroundColor = Color.red;
+        EditorGUILayout.LabelField("Очистить глобальный список", EditorStyles.boldLabel);
         if (GUILayout.Button("Очистить глобальный список", GUILayout.Width(200), GUILayout.Height(40)))
         {
             ItemDatabase.ClearGlobalList();

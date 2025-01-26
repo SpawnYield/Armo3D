@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
+using UnityEngine.AddressableAssets;
+
 
 [Serializable]
 public struct Item
@@ -12,7 +14,7 @@ public struct Item
     public int ItemPrice;            // Цена объекта
     public int ItemCount;            // Текущее количество объекта
     public int MaxItemCount;         // Максимальное количество объекта
-    
+
     public Item(int itemNameId, int prefabId, int scriptId,int imageId, int itemPrice, int itemCount, int maxItemCount)
     {
         ItemNameId = itemNameId;
@@ -23,7 +25,11 @@ public struct Item
         ItemCount = itemCount;
         MaxItemCount = maxItemCount;
     }
-
+    public Item(Item item)
+    {
+        this = item;
+    }
+    
     public readonly bool IsEmpty => ItemNameId < 0;
 
     public static Item operator +(Item a, Item b)
@@ -49,23 +55,34 @@ public struct Item
 
 public class Inventory : IDisposable
 {
-    public NativeHashMap<int, Item> Items;
-
-    public Inventory(int capacity)
+    public static NativeHashMap<int, Item> Items;
+    public event Action<Item> OnItemAdded;
+    public event Action<int> OnItemRemoved;
+    public event Action<Item> ItemMax;
+    public Inventory()
     {
-        Items = new NativeHashMap<int, Item>(capacity, Allocator.Persistent);
+        Items = new NativeHashMap<int, Item>(2048*12, Allocator.Persistent);
     }
 
     public void AddItem(Item item)
     {
         if (Items.ContainsKey(item.ItemNameId))
         {
+
+            if (Items[item.ItemNameId].ItemCount + item.ItemCount >= item.MaxItemCount)
+            {
+                ItemMax?.Invoke(item);
+                return;
+            }
+                
             Items[item.ItemNameId] = Items[item.ItemNameId] + item;
         }
         else
         {
             Items.Add(item.ItemNameId, item);
         }
+        OnItemAdded?.Invoke(item); // Уведомляем о добавлении
+
     }
 
     public void AddItems(IEnumerable<Item> items)
@@ -80,10 +97,16 @@ public class Inventory : IDisposable
     {
         return Items.TryGetValue(id, out var item) ? item : new Item(-1,-1, -1, -1, -1, -1, -1);
     }
-
+    public Item GetItem(int id)
+    {
+        return Items.TryGetValue(id, out var item) ? item : default;
+    }
     public void RemoveItem(int id)
     {
-        Items.Remove(id);
+        if (Items.Remove(id))
+        {
+            OnItemRemoved?.Invoke(id); // Уведомляем об удалении
+        }
     }
 
     public void RemoveItems(IEnumerable<int> ids)
@@ -97,9 +120,9 @@ public class Inventory : IDisposable
     public List<Item> GetAllItems()
     {
         var allItems = new List<Item>();
-        foreach (var kvp in Items)
+        foreach (var originalItem in Items)
         {
-            allItems.Add(kvp.Value);
+            allItems.Add(originalItem.Value);
         }
         return allItems;
     }
@@ -123,5 +146,17 @@ public class Inventory : IDisposable
         {
             Items.Dispose();
         }
+    }
+}
+
+[Serializable]
+public class ItemPrefab
+{
+    public int Id = -1; // Уникальный ID
+    public AssetReference Link; // Ссылка на ресурс
+
+    public void SetId(int id)
+    {
+        Id = id;
     }
 }

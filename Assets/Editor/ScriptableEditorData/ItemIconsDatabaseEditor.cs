@@ -7,6 +7,7 @@ public class ItemIconsDatabaseEditor : Editor
 
     private void OnEnable()
     {
+     
         // Загрузка пользовательской иконки из ресурсов
         if (customIcon == null)
         {
@@ -83,9 +84,17 @@ public class ItemIconsDatabaseEditor : Editor
         {
             ItemIconsDatabase.PrintGlobalList();
         }
-
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Синхронизировать глобальным и локальный список", EditorStyles.boldLabel);
+        GUI.backgroundColor = new(1,0.5f,0.75f);
+        if (GUILayout.Button("Синхронизировать", GUILayout.Width(400), GUILayout.Height(40)))
+        {
+            itemDatabase.MergeToGlobalList();
+        }
+        EditorGUILayout.Space();
         GUI.backgroundColor = Color.red;
-        if (GUILayout.Button("Очистить глобальный список", GUILayout.Width(200), GUILayout.Height(40)))
+        EditorGUILayout.LabelField("Очистить глобальный список", EditorStyles.boldLabel);
+        if (GUILayout.Button("Очистить", GUILayout.Width(200), GUILayout.Height(40)))
         {
             ItemIconsDatabase.ClearGlobalList();
         }
@@ -93,7 +102,7 @@ public class ItemIconsDatabaseEditor : Editor
 
     private void AddNewItem(ItemIconsDatabase itemDatabase)
     {
-        ItemIcon newItem = new ItemIcon();
+        ItemPrefab newItem = new ItemPrefab();
         itemDatabase.AddItem(newItem);
         EditorUtility.SetDirty(itemDatabase);
     }
