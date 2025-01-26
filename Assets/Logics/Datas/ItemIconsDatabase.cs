@@ -1,8 +1,8 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 [CreateAssetMenu(fileName = "ItemIconsDatabase", menuName = "Database/ItemIconsDatabase")]
 
@@ -10,12 +10,23 @@ public class ItemIconsDatabase : ScriptableObject
 {
     [HideInInspector]
     public List<ItemPrefab> ItemIcons = new List<ItemPrefab>(); // Локальный список предметов
+    public CentralData centralDataLink;
     private static HashSet<int> freeIds = new HashSet<int>(); // Список свободных ID
+    private bool isInitialized = false; // Флаг инициализации
 
-    public void Awake()
+    public void OnEnable() => Init();
+    public void OnValidate() => Init();
+    public void Awake() => Init();
+    private void Init()
     {
-        Debug.Log(ItemIcons);
+        // Инициализация только если не было выполнено ранее
+        if (isInitialized) return;
+        Debug.Log("inited ItemIconsDatabase");
+        MergeToGlobalList();
+        isInitialized = true; // Устанавливаем флаг инициализации
     }
+
+
     // Получение уникального ID
     public static int GetNextId()
     {
@@ -66,25 +77,33 @@ public class ItemIconsDatabase : ScriptableObject
     // Объединение локального списка с глобальным
     public void MergeToGlobalList()
     {
-        foreach (var item in ItemIcons)
+        try
         {
-            if (!CentralData.centralData.globalItemIconList.Any(existingItem => existingItem.Id == item.Id))
+            foreach (var item in ItemIcons)
             {
-                CentralData.centralData.globalItemIconList.Add(item);
+                // Проверяем, чтобы не добавить элемент в глобальный список, если его уже там нет (по ID)
+                if (!centralDataLink.globalItemIconList.Exists(existingItem => existingItem.Id == item.Id))
+                {
+                    centralDataLink.globalItemIconList.Add(item);
+                }
             }
+            Debug.Log("Все локальные предметы добавлены в глобальный список.");
+        }
+        catch (Exception ex)
+        {
+            Debug.Log($"Ошибка:{ex}");
         }
 
-        Debug.Log("Все локальные предметы добавлены в глобальный список.");
     }
 
     // Удаление предмета из глобального списка
     public void RemoveFromGlobalList(int itemId)
     {
 
-        var itemToRemove = CentralData.centralData.globalItemIconList.FirstOrDefault(x => x.Id == itemId);
+        var itemToRemove = centralDataLink.globalItemIconList.FirstOrDefault(x => x.Id == itemId);
         if (itemToRemove != null)
         {
-            CentralData.centralData.globalItemIconList.Remove(itemToRemove);
+            centralDataLink.globalItemIconList.Remove(itemToRemove);
             Debug.Log($"Предмет с ID {itemId} удален из глобального списка.");
         }
         else
@@ -94,34 +113,22 @@ public class ItemIconsDatabase : ScriptableObject
     }
 
     // Очистка глобального списка
-    public static void ClearGlobalList()
+    public void ClearGlobalList()
     {
-        CentralData.centralData.globalItemIconList.Clear();
+        centralDataLink.globalItemIconList.Clear();
         Debug.Log("Глобальный список очищен.");
-    }
-    // Получение ссылки на ресурс по ID
-    public static AssetReference GetImageAssetToID(int id)
-    {
-        var item = CentralData.centralData.globalItemIconList.FirstOrDefault(x => x.Id == id);
-        if (item == null)
-        {
-            Debug.LogWarning($"Item с ID {id} не найден в глобальном списке.");
-            return null;
-        }
-
-        return item.Link;
     }
 
     // Печать глобального списка
-    public static void PrintGlobalList()
+    public void PrintGlobalList()
     {
-        Debug.Log($"GlobalItemList Size: {CentralData.centralData.globalItemIconList.Count}");
+        Debug.Log($"GlobalItemList Size: {centralDataLink.globalItemIconList.Count}");
     }
 
     // Получение глобального списка
-    public static List<ItemPrefab> GetGlobalItemList()
+    public List<ItemPrefab> GetGlobalItemList()
     {
-        return CentralData.centralData.globalItemIconList;
+        return centralDataLink.globalItemIconList;
     }
 
 }

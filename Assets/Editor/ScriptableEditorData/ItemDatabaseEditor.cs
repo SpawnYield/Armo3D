@@ -31,9 +31,13 @@ public class ItemDatabaseEditor : Editor
 
         // Работа с SerializedObject для получения доступа к свойствам
         SerializedObject serializedItemDatabase = new SerializedObject(itemDatabase);
+        serializedItemDatabase.Update();
+        EditorGUILayout.LabelField("Управление всеми предметами", EditorStyles.boldLabel);
+        SerializedProperty itemsProperty = serializedItemDatabase.FindProperty("Items"); 
+        SerializedProperty centralDataProperty = serializedItemDatabase.FindProperty("centralDataLink");
+        EditorGUILayout.PropertyField(centralDataProperty, GUIContent.none, GUILayout.Height(35), GUILayout.Width(500));
+        serializedItemDatabase.ApplyModifiedProperties(); // Применяем изменения
 
-        // Рисуем элементы и добавляем поле для ассета и кнопку удаления
-        SerializedProperty itemsProperty = serializedItemDatabase.FindProperty("Items");
 
         for (int i = 0; i < itemsProperty.arraySize; i++)
         {
@@ -82,7 +86,7 @@ public class ItemDatabaseEditor : Editor
         GUI.backgroundColor = Color.yellow;
         if (GUILayout.Button("Вывести глобальный список", GUILayout.Width(400), GUILayout.Height(40)))
         {
-            ItemDatabase.PrintGlobalList();
+            itemDatabase.PrintGlobalList();
         }
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Синхронизировать глобальным и локальный список", EditorStyles.boldLabel);
@@ -96,8 +100,9 @@ public class ItemDatabaseEditor : Editor
         EditorGUILayout.LabelField("Очистить глобальный список", EditorStyles.boldLabel);
         if (GUILayout.Button("Очистить глобальный список", GUILayout.Width(200), GUILayout.Height(40)))
         {
-            ItemDatabase.ClearGlobalList();
+            itemDatabase.ClearGlobalList();
         }
+        serializedObject.ApplyModifiedProperties();
     }
 
     private void AddNewItem(ItemDatabase itemDatabase)

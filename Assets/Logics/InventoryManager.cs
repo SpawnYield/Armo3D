@@ -3,7 +3,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -11,6 +10,9 @@ using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
+
+    [Header("CentralData")]
+    public CentralData _CentralData;
 
     [Header("Inventory Limit:24,576 Различных Объектов")]
     [SerializeField]
@@ -64,8 +66,7 @@ public class InventoryManager : MonoBehaviour
             {
                 // Проверка на отмену перед каждой асинхронной операцией
                 _cancellationTokenSource.Token.ThrowIfCancellationRequested();
-
-                AssetReference reference = ItemIconsDatabase.GetImageAssetToID(item.ImageId);
+                AssetReference reference = _CentralData.GetAssetToID(item.ImageId,1);
                 var handle = Addressables.LoadAssetAsync<Sprite>(reference);
                 await handle.Task; // Ожидаем завершения загрузки
 

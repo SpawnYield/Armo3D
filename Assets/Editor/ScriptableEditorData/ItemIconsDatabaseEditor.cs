@@ -27,14 +27,21 @@ public class ItemIconsDatabaseEditor : Editor
 
     public override void OnInspectorGUI()
     {
+
         ItemIconsDatabase itemDatabase = (ItemIconsDatabase)target;
 
         // Работа с SerializedObject для получения доступа к свойствам
         SerializedObject serializedItemDatabase = new SerializedObject(itemDatabase);
+        serializedItemDatabase.Update(); // Обновляем SerializedObject перед отображением
 
         // Рисуем элементы и добавляем поле для ассета и кнопку удаления
+        EditorGUILayout.LabelField("Управление всеми предметами", EditorStyles.boldLabel);
         SerializedProperty itemsProperty = serializedItemDatabase.FindProperty("ItemIcons");
+        SerializedProperty centralDataProperty = serializedItemDatabase.FindProperty("centralDataLink");
+        EditorGUILayout.PropertyField(centralDataProperty, GUIContent.none, GUILayout.Height(35), GUILayout.Width(500));
+        serializedItemDatabase.ApplyModifiedProperties(); // Применяем изменения
 
+        EditorGUILayout.Space();
         for (int i = 0; i < itemsProperty.arraySize; i++)
         {
             GUI.backgroundColor = Color.cyan;
@@ -82,7 +89,7 @@ public class ItemIconsDatabaseEditor : Editor
         GUI.backgroundColor = Color.yellow;
         if (GUILayout.Button("Вывести глобальный список", GUILayout.Width(400), GUILayout.Height(40)))
         {
-            ItemIconsDatabase.PrintGlobalList();
+            itemDatabase.PrintGlobalList();
         }
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Синхронизировать глобальным и локальный список", EditorStyles.boldLabel);
@@ -96,8 +103,9 @@ public class ItemIconsDatabaseEditor : Editor
         EditorGUILayout.LabelField("Очистить глобальный список", EditorStyles.boldLabel);
         if (GUILayout.Button("Очистить", GUILayout.Width(200), GUILayout.Height(40)))
         {
-            ItemIconsDatabase.ClearGlobalList();
+            itemDatabase.ClearGlobalList();
         }
+
     }
 
     private void AddNewItem(ItemIconsDatabase itemDatabase)

@@ -11,8 +11,23 @@ public class ItemDatabase : ScriptableObject
     // Глобальный статический список всех предметов
     [HideInInspector] 
     public List<ItemPrefab> Items = new List<ItemPrefab>();
+    public CentralData centralDataLink;
     // Очередь свободных ID
     private static HashSet<int> freeIds = new HashSet<int>();
+    private bool isInitialized = false; // Флаг инициализации
+
+    public void OnEnable() => Init();
+    public void OnValidate() => Init();
+    public void Awake() => Init();
+    private void Init()
+    {
+        // Инициализация только если не было выполнено ранее
+        if (isInitialized) return;
+        Debug.Log("inited ItemDatabase");
+        MergeToGlobalList();
+        isInitialized = true; // Устанавливаем флаг инициализации
+    }
+
 
     // Получение уникального ID
     public static int GetNextId()
@@ -82,27 +97,36 @@ public class ItemDatabase : ScriptableObject
     // Объединение всех предметов из локального списка в глобальный
     public void MergeToGlobalList()
     {
-        foreach (var item in Items)
+        try
         {
-            // Проверяем, чтобы не добавить элемент в глобальный список, если его уже там нет (по ID)
-            if (!CentralData.centralData.GlobalItemList.Exists(existingItem => existingItem.Id == item.Id))
+            foreach (var item in Items)
             {
-                CentralData.centralData.GlobalItemList.Add(item);
+                // Проверяем, чтобы не добавить элемент в глобальный список, если его уже там нет (по ID)
+                if (!centralDataLink.GlobalItemList.Exists(existingItem => existingItem.Id == item.Id))
+                {
+                    centralDataLink.GlobalItemList.Add(item);
+                }
             }
+            Debug.Log("Все локальные предметы добавлены в глобальный список.");
+        }
+        catch (Exception ex)
+        {
+            Debug.Log($"Ошибка:{ex}");
         }
 
-        Debug.Log("Все локальные предметы добавлены в глобальный список.");
+
+
     }
     // Метод для удаления предмета из глобального списка по ID
     public void RemoveFromGlobalList(int itemId)
     {
         // Находим элемент в глобальном списке по ID
-        var itemToRemove = CentralData.centralData.GlobalItemList.FirstOrDefault(existingItem => existingItem.Id == itemId);
+        var itemToRemove = centralDataLink.GlobalItemList.FirstOrDefault(existingItem => existingItem.Id == itemId);
 
         if (itemToRemove != null)
         {
             // Удаляем элемент, если он найден
-            CentralData.centralData.GlobalItemList.Remove(itemToRemove);
+            centralDataLink.GlobalItemList.Remove(itemToRemove);
             Debug.Log("Предмет с ID " + itemId + " удален из глобального списка.");
         }
         else
@@ -113,20 +137,20 @@ public class ItemDatabase : ScriptableObject
     }
 
     // Очистка глобального списка
-    public static void ClearGlobalList()
+    public void ClearGlobalList()
     {
-        CentralData.centralData.GlobalItemList.Clear();
+        centralDataLink.GlobalItemList.Clear();
         Debug.Log("Глобальный список очищен.");
     }
 
-    public static void PrintGlobalList()
+    public void PrintGlobalList()
     {
         Debug.Log($"GlobalItemList Size:{GetGlobalItemList().Count};");
     }
 
-    public static List<ItemPrefab> GetGlobalItemList()
+    public List<ItemPrefab> GetGlobalItemList()
     {
-        return CentralData.centralData.GlobalItemList;
+        return centralDataLink.GlobalItemList;
     }
 }
 

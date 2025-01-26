@@ -7,7 +7,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 277a16ebd98821940b79527bb9cae1e0, type: 3}
   m_Name: SwordsDataBase
@@ -20,3 +20,4 @@ MonoBehaviour:
       m_SubObjectGUID: 
       m_SubObjectType: 
       m_EditorAssetChanged: 1
+  centralDataLink: {fileID: 11400000, guid: a267c1bacb4d6b348bf33e87cc37d7e8, type: 2}
