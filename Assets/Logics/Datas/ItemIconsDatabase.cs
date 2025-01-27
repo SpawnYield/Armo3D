@@ -5,28 +5,19 @@ using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ItemIconsDatabase", menuName = "Database/ItemIconsDatabase")]
-
+[Serializable]
 public class ItemIconsDatabase : ScriptableObject
 {
     [HideInInspector]
     public List<ItemPrefab> ItemIcons = new List<ItemPrefab>(); // Локальный список предметов
-    public CentralData centralDataLink;
     private static HashSet<int> freeIds = new HashSet<int>(); // Список свободных ID
-    private bool isInitialized = false; // Флаг инициализации
 
-    public void OnEnable() => Init();
-    public void OnValidate() => Init();
-    public void Awake() => Init();
-    private void Init()
+    public void Init()
     {
-        // Инициализация только если не было выполнено ранее
-        if (isInitialized) return;
         Debug.Log("inited ItemIconsDatabase");
         MergeToGlobalList();
-        isInitialized = true; // Устанавливаем флаг инициализации
+
     }
-
-
     // Получение уникального ID
     public static int GetNextId()
     {
@@ -82,9 +73,9 @@ public class ItemIconsDatabase : ScriptableObject
             foreach (var item in ItemIcons)
             {
                 // Проверяем, чтобы не добавить элемент в глобальный список, если его уже там нет (по ID)
-                if (!centralDataLink.globalItemIconList.Exists(existingItem => existingItem.Id == item.Id))
+                if (!CentralData.globalItemIconList.Exists(existingItem => existingItem.Id == item.Id))
                 {
-                    centralDataLink.globalItemIconList.Add(item);
+                    CentralData.globalItemIconList.Add(item);
                 }
             }
             Debug.Log("Все локальные предметы добавлены в глобальный список.");
@@ -100,10 +91,10 @@ public class ItemIconsDatabase : ScriptableObject
     public void RemoveFromGlobalList(int itemId)
     {
 
-        var itemToRemove = centralDataLink.globalItemIconList.FirstOrDefault(x => x.Id == itemId);
+        var itemToRemove = CentralData.globalItemIconList.FirstOrDefault(x => x.Id == itemId);
         if (itemToRemove != null)
         {
-            centralDataLink.globalItemIconList.Remove(itemToRemove);
+            CentralData.globalItemIconList.Remove(itemToRemove);
             Debug.Log($"Предмет с ID {itemId} удален из глобального списка.");
         }
         else
@@ -115,20 +106,20 @@ public class ItemIconsDatabase : ScriptableObject
     // Очистка глобального списка
     public void ClearGlobalList()
     {
-        centralDataLink.globalItemIconList.Clear();
+        CentralData.globalItemIconList.Clear();
         Debug.Log("Глобальный список очищен.");
     }
 
     // Печать глобального списка
     public void PrintGlobalList()
     {
-        Debug.Log($"GlobalItemList Size: {centralDataLink.globalItemIconList.Count}");
+        Debug.Log($"GlobalItemList Size: {CentralData.globalItemIconList.Count}");
     }
 
     // Получение глобального списка
     public List<ItemPrefab> GetGlobalItemList()
     {
-        return centralDataLink.globalItemIconList;
+        return CentralData.globalItemIconList;
     }
 
 }

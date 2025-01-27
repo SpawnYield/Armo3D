@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalItemList: []
   globalItemIconList: []
+  ItemDataBaseList:
+  - {fileID: 11400000, guid: acf8dbb6f70cef54d9839d7af53aad9b, type: 2}
+  ItemImageDataBaseList:
+  - {fileID: 11400000, guid: cf9195ad8d4e54943bdc51ffb11169cb, type: 2}

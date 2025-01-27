@@ -32,14 +32,11 @@ public class ItemIconsDatabaseEditor : Editor
 
         // Работа с SerializedObject для получения доступа к свойствам
         SerializedObject serializedItemDatabase = new SerializedObject(itemDatabase);
-        serializedItemDatabase.Update(); // Обновляем SerializedObject перед отображением
+
 
         // Рисуем элементы и добавляем поле для ассета и кнопку удаления
-        EditorGUILayout.LabelField("Управление всеми предметами", EditorStyles.boldLabel);
+
         SerializedProperty itemsProperty = serializedItemDatabase.FindProperty("ItemIcons");
-        SerializedProperty centralDataProperty = serializedItemDatabase.FindProperty("centralDataLink");
-        EditorGUILayout.PropertyField(centralDataProperty, GUIContent.none, GUILayout.Height(35), GUILayout.Width(500));
-        serializedItemDatabase.ApplyModifiedProperties(); // Применяем изменения
 
         EditorGUILayout.Space();
         for (int i = 0; i < itemsProperty.arraySize; i++)

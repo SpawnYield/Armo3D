@@ -31,12 +31,12 @@ public class ItemDatabaseEditor : Editor
 
         // Работа с SerializedObject для получения доступа к свойствам
         SerializedObject serializedItemDatabase = new SerializedObject(itemDatabase);
-        serializedItemDatabase.Update();
-        EditorGUILayout.LabelField("Управление всеми предметами", EditorStyles.boldLabel);
-        SerializedProperty itemsProperty = serializedItemDatabase.FindProperty("Items"); 
-        SerializedProperty centralDataProperty = serializedItemDatabase.FindProperty("centralDataLink");
-        EditorGUILayout.PropertyField(centralDataProperty, GUIContent.none, GUILayout.Height(35), GUILayout.Width(500));
-        serializedItemDatabase.ApplyModifiedProperties(); // Применяем изменения
+        //serializedItemDatabase.Update();
+        // EditorGUILayout.LabelField("Управление всеми предметами", EditorStyles.boldLabel);
+        SerializedProperty itemsProperty = serializedItemDatabase.FindProperty("Items");
+        //SerializedProperty centralDataProperty = serializedItemDatabase.FindProperty("centralDataLink");
+        //EditorGUILayout.PropertyField(centralDataProperty, GUIContent.none, GUILayout.Height(35), GUILayout.Width(500));
+        //serializedItemDatabase.ApplyModifiedProperties(); // Применяем изменения
 
 
         for (int i = 0; i < itemsProperty.arraySize; i++)
