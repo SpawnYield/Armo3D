@@ -15,9 +15,8 @@ MonoBehaviour:
   Items:
   - Id: 1
     Link:
-      m_AssetGUID: f09a3f45da95beb45b1ae020e7826303
+      m_AssetGUID: 4e252c194439bf8479e4b0a1235cdbff
       m_SubObjectName: 
       m_SubObjectGUID: 
       m_SubObjectType: 
       m_EditorAssetChanged: 1
-  centralDataLink: {fileID: 11400000, guid: a267c1bacb4d6b348bf33e87cc37d7e8, type: 2}

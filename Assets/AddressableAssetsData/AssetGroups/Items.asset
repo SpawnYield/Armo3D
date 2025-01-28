@@ -14,12 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GroupName: Items
   m_GUID: fd35721c0a2744340b4ab2be192b401e
-  m_SerializeEntries:
-  - m_GUID: f09a3f45da95beb45b1ae020e7826303
-    m_Address: Assets/Models/Items/Swords/prefabs/Iron-Sword.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 33de70f72ae352c46ada962d3e765138, type: 2}
   m_SchemaSet:

@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 909ccf46d22ddbd48a70d2c399dc30cd
   m_SerializeEntries:
+  - m_GUID: 4e252c194439bf8479e4b0a1235cdbff
+    m_Address: Assets/Models/Items/Swords/prefabs/Iron-Sword.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8c0da21d1629f2c4493b7f505cb26b70
     m_Address: Assets/Models/Items/Swords/prefabs/ico_2.png
     m_ReadOnly: 0
