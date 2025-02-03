@@ -787,13 +787,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bullet: {fileID: 2816247669121933359, guid: 0881a5f1849c30d4791b388868bbc2fd, type: 3}
-  Count: 15
-  Row: 15
-  Iterations: 25000
-  Interval: 0.0002
-  LifeTime: 0.4
+  Count: 50
+  Row: 50
+  Interval: 0.005
+  LifeTime: 0.5
   Power: 30
   Pooling: 0
+  JobSystem: 1
 --- !u!1 &1762749684
 GameObject:
   m_ObjectHideFlags: 0

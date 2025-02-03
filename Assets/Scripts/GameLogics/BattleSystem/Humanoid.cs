@@ -5,9 +5,6 @@ public class Humanoid : MonoBehaviour
 {
     [SerializeField]
     private float maxHealth = 1000f; // Максимальное здоровье, видимое в инспекторе
-
-    private float health; // Текущее здоровье (скрытое поле)
-
     public float MaxHealth
     {
         get => maxHealth;
@@ -20,7 +17,7 @@ public class Humanoid : MonoBehaviour
             }
         }
     }
-
+    private float health; // Текущее здоровье (скрытое поле)
     public float Health
     {
         get => health;
@@ -81,11 +78,27 @@ public class Humanoid : MonoBehaviour
         get => mana;
         set => mana = Mathf.Clamp(value, 0, maxMana); // Ограничиваем ману в пределах [0, maxMana]
     }
+    [SerializeField,Range(0f,100f)]
+    private float walkSpeed = 1f; // Максимальное здоровье, видимое в инспекторе
+    public float WalkSpeed
+    {
+        get => walkSpeed;
+        set
+        {
+            if (walkSpeed != value)
+            {
+                walkSpeed = Mathf.Clamp(value,0,100);
+                OnSpeedChanged?.Invoke(); // Событие для изменения маны
+            }
+        }
+    }
+
     public event Action OnDied;
     public event Action OnTakeDamaged;
     public event Action OnMaxHealthChanged;
     public event Action OnMaxStaminaChanged;
     public event Action OnMaxManaChanged;
+    public event Action OnSpeedChanged;
 
     public Humanoid Killer { get; private set; }
     public bool Died { get; private set; }
@@ -98,17 +111,14 @@ public class Humanoid : MonoBehaviour
         {
             return;
         }
-
         Killer = killer;
         Health -= damage; // Уменьшаем здоровье
-
         if (Health <= 0)
         {
             Died = true;
             Debug.Log($"{Name} умер от {Killer.name}");
             OnDied?.Invoke();
         }
-        
     }
     private void Start()
     {
