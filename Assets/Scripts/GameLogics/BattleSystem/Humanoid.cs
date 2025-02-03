@@ -107,12 +107,13 @@ public class Humanoid : MonoBehaviour
 
     public void TakeDamage(float damage, Humanoid killer)
     {
-        if (Died || Health <= 0 || killer == null)
+        if (Died == true|| Health <= 0 || killer == null||damage <0)
         {
             return;
         }
         Killer = killer;
         Health -= damage; // Уменьшаем здоровье
+        Debug.Log($"{Name} Получил {damage} урон от {Killer.name}");
         if (Health <= 0)
         {
             Died = true;

@@ -217,8 +217,11 @@ MonoBehaviour:
   groundCheck: {fileID: 5708278933683913381}
   groundCheckRadius: 0.25
   _Animator: {fileID: 5213170681352485433}
+  _enemyTargetComponent: {fileID: 0}
   playerVelocity: {x: 0, y: 0, z: 0}
   cameraOffset: {x: 0, y: 0.5, z: 0}
+  YouDiedText: {fileID: 0}
+  BlackGround: {fileID: 0}
   _characterController: {fileID: 185574675255684299}
   _mainCamera: {fileID: 0}
   _movement: {fileID: 298705023919072815}
@@ -365,12 +368,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c165993dbeba2ac41809aa7502eb6fde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damage: 100
-  DamageRadius: 0.95
-  Owner: {fileID: 5394176683641618617}
-  TargetLayers:
+  targetLayers:
     serializedVersion: 2
     m_Bits: 8192
+  owner: {fileID: 5394176683641618617}
 --- !u!1 &7659748736802547117
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,6 +478,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06b5f69538f6d2d49862c219ed180112, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Died: 0
 --- !u!114 &5394176683641618617
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -492,6 +494,7 @@ MonoBehaviour:
   maxHealth: 20000
   maxStamina: 1000
   maxMana: 1000
+  walkSpeed: 1
   Name: Albert
 --- !u!1001 &1815639720638433192
 PrefabInstance:

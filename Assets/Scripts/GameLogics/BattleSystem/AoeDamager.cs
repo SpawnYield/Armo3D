@@ -3,12 +3,11 @@ using UnityEngine;
 
 public class AoeDamager : MonoBehaviour
 {
-    [SerializeField]
-    private LayerMask targetLayers;
-    private HashSet<Humanoid> damagedHumanoids = new HashSet<Humanoid>();
-    private float damage = 1f;
-    private float damageRadius = 1f;
-    private Humanoid owner;
+    private readonly HashSet<Humanoid> damagedHumanoids = new ();
+    [SerializeField] private LayerMask targetLayers;
+    [SerializeField] private float damage = 10f;
+    [SerializeField] private float damageRadius = 1f;
+    [SerializeField] private Humanoid owner;
     // Свойства для управления переменными (если нужно)
     public float Damage
     {
@@ -37,25 +36,37 @@ public class AoeDamager : MonoBehaviour
     public void ApplyDamage()
     {
         damagedHumanoids.Clear();
-        // Считываем все коллайдеры в радиусе
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, damageRadius, targetLayers);
-        foreach (var hitCollider in hitColliders)
-        {
-            // Получаем компонент Humanoid, если он есть
-            hitCollider.gameObject.TryGetComponent(out Humanoid humanoid);
+        RaycastHit[] hitResults = new RaycastHit[300]; // Максимум 10 объектов (можно изменить)
+        Vector3 direction = Vector3.forward; // Направление луча (можно задать любое)
 
+        int hitCount = Physics.SphereCastNonAlloc(
+            transform.position,     // Начальная позиция сферы
+            damageRadius,           // Радиус сферы
+            direction,              // Направление движения
+            hitResults,             // Массив для результатов
+            damageRadius,           // Длина сферы (0 = только начальная точка)
+            targetLayers            // Слой, по которому ищем
+        );
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            hitResults[i].collider.TryGetComponent(out Humanoid humanoid);
             // Если Humanoid не найден или уже был поврежден — пропускаем
             if (humanoid == null || damagedHumanoids.Contains(humanoid))
                 continue;
-
+            Debug.Log($"{damage} Damaged!");
             // Добавляем в список поврежденных и наносим урон
             damagedHumanoids.Add(humanoid);
             humanoid.TakeDamage(damage, owner);
+            Debug.Log("Попадание: " + hitResults[i].collider.name);
         }
+
+
     }
     // Вызывается при активации объекта
     public void OnEnable()
     {
+       
         ApplyDamage();
     }
     private void OnDrawGizmos()

@@ -54,6 +54,7 @@ public class EnemyExample : MonoBehaviour
         _Animator.SetBool("Died",true);
         _HpCanvas.SetActive(false);
         characterController.enabled = false;
+        agent.enabled = false;
     }
     private void TakeDamaged()
     {

@@ -28758,8 +28758,16 @@ PrefabInstance:
       value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 3261154135070516510, guid: b0fd5f45e58fc5a41a67f6fdc08c760c, type: 3}
+      propertyPath: damage
+      value: 250
+      objectReference: {fileID: 0}
+    - target: {fileID: 3261154135070516510, guid: b0fd5f45e58fc5a41a67f6fdc08c760c, type: 3}
       propertyPath: _collider
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3261154135070516510, guid: b0fd5f45e58fc5a41a67f6fdc08c760c, type: 3}
+      propertyPath: targetLayers.m_Bits
+      value: 8192
       objectReference: {fileID: 0}
     - target: {fileID: 4123605415535369154, guid: b0fd5f45e58fc5a41a67f6fdc08c760c, type: 3}
       propertyPath: m_Name

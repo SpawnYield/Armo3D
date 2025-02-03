@@ -135,7 +135,7 @@ public class PlayerController : NetworkBehaviour
         }
 
         // Очистка ссылки на камеру
-        if(Game_Manager.instance._moveModule._mainCamera)
+        if(Game_Manager.instance!=null&&Game_Manager.instance._moveModule!=null&&Game_Manager.instance._moveModule._mainCamera!=null)
             Game_Manager.instance._moveModule._mainCamera = null;
         cinemachine3rdPersonFollow = null;
     }

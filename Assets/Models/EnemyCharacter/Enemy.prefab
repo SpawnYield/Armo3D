@@ -482,12 +482,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c165993dbeba2ac41809aa7502eb6fde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damage: 30
-  DamageRadius: 0.65
-  Owner: {fileID: 1364476073838364852}
-  TargetLayers:
+  targetLayers:
     serializedVersion: 2
     m_Bits: 512
+  damage: 25
+  damageRadius: 1
+  owner: {fileID: 1364476073838364852}
 --- !u!1 &6929147131218034899
 GameObject:
   m_ObjectHideFlags: 0
@@ -588,6 +588,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 1688771815365331625}
   characterController: {fileID: 5048750729887345027}
+  navMeshAgent: {fileID: 1688771815365331625}
   _Animator: {fileID: 3640483018695785180}
   Distance: 20
   AttackDistance: 1.425
@@ -616,6 +617,7 @@ MonoBehaviour:
   maxHealth: 1000
   maxStamina: 1000
   maxMana: 1000
+  walkSpeed: 1
   Name: Boxer
 --- !u!1 &6955963410818798060
 GameObject:
